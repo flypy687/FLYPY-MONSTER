@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: flypy-monster-backend
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: LIVE_FEED_URL
+        value: https://biquote.io/api
+      - key: CORS_ORIGIN
+        value: '*'
+      - key: MIN_CANDLES
+        value: '120'
+      - key: CACHE_MS
+        value: '2500'
+      - key: QUOTEX_WS_URL
+        value: wss://ws2.qxbroker.com/socket.io/?EIO=3&transport=websocket
+      - key: QUOTEX_IS_DEMO
+        value: '1'
+      - key: QUOTEX_SESSION
+        sync: false

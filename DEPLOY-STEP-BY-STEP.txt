@@ -1,0 +1,45 @@
+FLYPY MONSTER — DEPLOYMENT
+
+IMPORTANT
+Netlify is only the frontend/static host. The Node signal backend must run on a Node-capable host such as Render.
+
+1) BACKEND
+- Deploy the FLYPY MONSTER project to Render as a Node Web Service.
+- Build command: npm install
+- Start command: npm start
+- Health URL after deploy:
+  https://YOUR-RENDER-URL.onrender.com/health
+- It must return JSON with ok:true.
+
+2) BACKEND ENVIRONMENT
+Set these in Render:
+LIVE_FEED_URL=https://biquote.io/api
+CORS_ORIGIN=*
+MIN_CANDLES=120
+CACHE_MS=2500
+QUOTEX_WS_URL=wss://ws2.qxbroker.com/socket.io/?EIO=3&transport=websocket
+QUOTEX_IS_DEMO=1
+QUOTEX_SESSION=<your private Quotex session, if OTC is required>
+
+Never put QUOTEX_SESSION in the frontend or in public source control.
+
+3) NETLIFY
+- Deploy the root folder containing index.html and netlify.toml.
+- Open netlify.toml and replace:
+  https://YOUR-RENDER-URL.onrender.com
+  with the exact HTTPS Render backend URL.
+- Redeploy Netlify.
+
+4) TEST
+Open:
+  https://YOUR-NETLIFY-SITE.netlify.app/health
+This path is NOT the backend health check; it may be proxied only if configured. The reliable backend test is the Render /health URL.
+
+Then test the app's Generate Signal button.
+
+5) IMPORTANT MARKET LIMITATION
+The configured BiQuote live feed provides 1-minute and 5-minute OHLC in this build. The frontend/backend do NOT falsely convert 15-second or 30-second LIVE requests into 1-minute candles.
+If a server/timeframe requests a live sub-minute candle without a true sub-minute source, the backend returns NO SIGNAL / feed error rather than pretending it is accurate.
+
+6) OTC
+OTC requires a real Quotex session on the backend. If QUOTEX_SESSION is absent or invalid, OTC signals are intentionally unavailable; no random/fake candles are generated.

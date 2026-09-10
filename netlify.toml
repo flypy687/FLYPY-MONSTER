@@ -1,0 +1,9 @@
+# Netlify serves the existing FLYPY MONSTER UI.
+# After the Node backend is deployed, replace YOUR-RENDER-URL below
+# with the exact HTTPS URL of that backend.
+
+[[redirects]]
+  from = "/api/*"
+  to = "https://YOUR-RENDER-URL.onrender.com/api/:splat"
+  status = 200
+  force = true

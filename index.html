@@ -1,0 +1,3536 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Flypy Monster — Private Bot</title>
+
+<style>
+:root{
+  --bg-main:#05080d;
+  --accent:#00ffcc;
+  --accent-soft:rgba(0,255,204,.25);
+  --buy:#2dff9a;
+  --sell:#ff375f;
+  --gold:#ffd84d;
+  --orange:#ffb84d;
+  --text:#e8fdf9;
+  --muted:#8fbfb6;
+}
+
+*{
+  box-sizing:border-box;
+}
+
+html,body{
+  width:100%;
+  min-height:100%;
+  margin:0;
+}
+
+body{
+  background:#000;
+  font-family:"Segoe UI",Roboto,Arial,sans-serif;
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+  overflow-x:hidden;
+}
+
+#candle-bg{
+  position:fixed;
+  inset:0;
+  width:100%;
+  height:100%;
+  z-index:-5;
+  background:
+    radial-gradient(
+      circle at center,
+      #0a0f14,
+      #000 72%
+    );
+}
+
+.card{
+  width:100%;
+  max-width:520px;
+  padding:22px;
+  border-radius:16px;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,.025),
+      rgba(0,0,0,.45)
+    );
+  border:1px solid rgba(0,255,204,.10);
+  box-shadow:
+    0 12px 40px rgba(0,0,0,.75),
+    0 0 40px rgba(0,255,204,.04);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  position:relative;
+  z-index:2;
+}
+
+.logo{
+  width:84px;
+  height:84px;
+  border-radius:12px;
+  display:block;
+  margin:8px auto 10px;
+  object-fit:cover;
+  background:rgba(0,255,204,.05);
+  box-shadow:0 0 30px rgba(0,255,204,.25);
+}
+
+h1{
+  margin:6px 0 12px;
+  font-size:20px;
+  text-align:center;
+  text-shadow:
+    0 2px 10px rgba(0,0,0,.8),
+    0 0 8px rgba(0,255,204,.15);
+}
+
+h2{
+  color:var(--accent);
+}
+
+input,select,button{
+  width:100%;
+  padding:12px 14px;
+  margin:8px 0;
+  border-radius:10px;
+  font-size:15px;
+}
+
+input,select{
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.12);
+  color:#eafffb;
+  outline:none;
+}
+
+select option{
+  background:#071017;
+  color:#fff;
+}
+
+input:focus,
+select:focus{
+  border-color:rgba(0,255,204,.45);
+  box-shadow:0 0 15px rgba(0,255,204,.08);
+}
+
+input::placeholder{
+  color:rgba(255,255,255,.45);
+}
+
+button{
+  border:1px solid rgba(0,255,204,.25);
+  background:
+    linear-gradient(
+      135deg,
+      #020617,
+      #0f172a
+    );
+  color:#eafffb;
+  cursor:pointer;
+  transition:.15s ease;
+}
+
+button:hover{
+  border-color:rgba(0,255,204,.5);
+  box-shadow:0 0 18px rgba(0,255,204,.12);
+}
+
+button:active{
+  transform:translateY(1px) scale(.98);
+}
+
+button:disabled{
+  opacity:.45;
+  cursor:not-allowed;
+}
+
+.note,
+.small{
+  font-size:13px;
+  color:var(--muted);
+}
+
+.flex-row{
+  display:flex;
+  gap:8px;
+}
+
+.flex-row>*{
+  flex:1;
+}
+
+.btn-ghost{
+  background:transparent;
+  border:1px solid rgba(255,255,255,.08);
+  color:#fff;
+  padding:10px;
+  border-radius:10px;
+  text-align:center;
+}
+
+#amountInput{
+  color:#fff;
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(0,255,200,.25);
+}
+
+#signal-btn{
+  font-weight:700;
+  letter-spacing:.3px;
+  box-shadow:
+    inset 0 0 10px rgba(0,255,204,.15),
+    0 8px 25px rgba(0,0,0,.6);
+}
+
+#auto-toggle.active{
+  background:rgba(0,255,204,.15);
+  box-shadow:0 0 20px rgba(0,255,204,.35);
+  color:var(--accent);
+}
+
+#countdown{
+  display:none;
+}
+
+#signal-box{
+  margin-top:12px;
+  min-height:90px;
+  padding:12px;
+  background:rgba(0,0,0,.35);
+  border-radius:8px;
+  border-left:3px solid rgba(0,255,204,.6);
+  font-weight:700;
+  font-size:15px;
+  line-height:1.4;
+  color:var(--accent);
+  white-space:pre-line;
+}
+
+.strength-bar{
+  height:12px;
+  margin-top:10px;
+  background:rgba(255,255,255,.06);
+  border-radius:6px;
+  overflow:hidden;
+}
+
+.strength-fill{
+  height:100%;
+  width:0;
+  transition:
+    width .35s,
+    background .35s;
+}
+
+.confidence-meter{
+  height:10px;
+  background:#111;
+  border-radius:8px;
+  margin-top:8px;
+  overflow:hidden;
+}
+
+#confidence-fill{
+  height:100%;
+  width:0;
+  background:
+    linear-gradient(
+      90deg,
+      #ff375f,
+      #ffb84d,
+      #7cff4a
+    );
+  transition:width .4s;
+}
+
+#history{
+  margin-top:12px;
+  text-align:left;
+  background:#06060a;
+  padding:10px;
+  border-radius:10px;
+  max-height:160px;
+  overflow:auto;
+  font-size:13px;
+  color:#dfe7ee;
+}
+
+.history-entry{
+  padding:7px 10px;
+  margin:4px 0;
+  border-left:3px solid var(--accent);
+  background:rgba(255,255,255,.04);
+  font-size:12px;
+}
+
+#clock{
+  position:fixed;
+  left:18px;
+  bottom:18px;
+  background:#04040a;
+  padding:8px 12px;
+  border-radius:10px;
+  color:var(--accent);
+  font-family:monospace;
+  box-shadow:0 0 15px rgba(0,255,204,.35);
+  z-index:10;
+}
+
+#vip{
+  position:fixed;
+  right:18px;
+  top:18px;
+  background:gold;
+  color:#000;
+  padding:6px 10px;
+  border-radius:10px;
+  font-weight:700;
+  z-index:10;
+}
+
+
+/* =========================================================
+   PHASE 2A — FULL SIGNAL EXECUTION OVERLAY
+========================================================= */
+
+#signal-overlay{
+  position:fixed;
+  inset:0;
+  z-index:1000;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  background:
+    radial-gradient(
+      circle at center,
+      rgba(0,255,204,.09),
+      rgba(0,0,0,.97) 62%
+    );
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+}
+
+#signal-overlay.active{
+  display:flex;
+  animation:overlayFade .22s ease;
+}
+
+@keyframes overlayFade{
+  from{
+    opacity:0;
+  }
+  to{
+    opacity:1;
+  }
+}
+
+.execution-card{
+  width:min(460px,94vw);
+  padding:28px 20px;
+  border-radius:24px;
+  text-align:center;
+  background:
+    linear-gradient(
+      160deg,
+      rgba(5,15,20,.98),
+      rgba(0,0,0,.98)
+    );
+  border:1px solid rgba(0,255,204,.30);
+  box-shadow:
+    0 0 35px rgba(0,255,204,.12),
+    inset 0 0 30px rgba(0,255,204,.025);
+}
+
+.execution-top{
+  color:#71918b;
+  font-size:10px;
+  letter-spacing:3px;
+  text-transform:uppercase;
+}
+
+.execution-pair{
+  margin-top:8px;
+  font-size:16px;
+  color:#eafffb;
+  font-weight:700;
+}
+
+.execution-state{
+  margin-top:14px;
+  font-size:12px;
+  letter-spacing:2px;
+  color:#8ca9a4;
+  text-transform:uppercase;
+}
+
+#big-count{
+  height:150px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:110px;
+  line-height:1;
+  font-weight:900;
+  color:var(--accent);
+  text-shadow:
+    0 0 10px rgba(0,255,204,.9),
+    0 0 30px rgba(0,255,204,.7),
+    0 0 70px rgba(0,255,204,.45);
+  animation:
+    countPulse .8s ease infinite;
+}
+
+@keyframes countPulse{
+  0%,100%{
+    transform:scale(1);
+  }
+  50%{
+    transform:scale(1.06);
+  }
+}
+
+#big-count.go{
+  color:#7cff4a;
+  font-size:78px;
+  text-shadow:
+    0 0 10px rgba(124,255,74,.9),
+    0 0 35px rgba(124,255,74,.65),
+    0 0 70px rgba(124,255,74,.4);
+}
+
+.execution-direction{
+  font-size:28px;
+  font-weight:900;
+  letter-spacing:4px;
+}
+
+.execution-direction.call{
+  color:var(--buy);
+  text-shadow:0 0 20px rgba(45,255,154,.5);
+}
+
+.execution-direction.put{
+  color:var(--sell);
+  text-shadow:0 0 20px rgba(255,55,95,.5);
+}
+
+.execution-meta{
+  margin-top:18px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+}
+
+.execution-meta-box{
+  padding:10px;
+  border-radius:10px;
+  background:rgba(255,255,255,.035);
+  border:1px solid rgba(255,255,255,.06);
+}
+
+.execution-meta-box span{
+  display:block;
+  color:#66827d;
+  font-size:9px;
+  letter-spacing:1px;
+  text-transform:uppercase;
+}
+
+.execution-meta-box strong{
+  display:block;
+  margin-top:4px;
+  color:#fff;
+  font-size:14px;
+}
+
+.execution-warning{
+  margin-top:15px;
+  color:#637d78;
+  font-size:10px;
+  line-height:1.5;
+}
+
+
+/* =========================================================
+   PHASE 2A — TRADE PANEL
+========================================================= */
+
+#trade-panel{
+  display:none;
+  margin-top:14px;
+  padding:16px;
+  border-radius:16px;
+  background:
+    linear-gradient(
+      145deg,
+      rgba(5,12,18,.97),
+      rgba(0,0,0,.94)
+    );
+  border:1px solid rgba(0,255,204,.28);
+  box-shadow:
+    0 0 25px rgba(0,255,204,.08),
+    inset 0 0 25px rgba(0,255,204,.025);
+  text-align:center;
+}
+
+#trade-panel.active{
+  animation:panelIn .3s ease;
+}
+
+@keyframes panelIn{
+  from{
+    opacity:0;
+    transform:translateY(8px) scale(.98);
+  }
+  to{
+    opacity:1;
+    transform:translateY(0) scale(1);
+  }
+}
+
+.trade-label{
+  color:#7b9994;
+  font-size:11px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+}
+
+.trade-pair{
+  font-size:14px;
+  color:#d8fff7;
+  margin-top:5px;
+}
+
+.trade-direction{
+  font-size:34px;
+  font-weight:900;
+  letter-spacing:3px;
+  margin:8px 0;
+}
+
+.trade-direction.call{
+  color:var(--buy);
+  text-shadow:0 0 18px rgba(45,255,154,.45);
+}
+
+.trade-direction.put{
+  color:var(--sell);
+  text-shadow:0 0 18px rgba(255,55,95,.45);
+}
+
+.trade-info{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin:12px 0;
+}
+
+.trade-info-box{
+  padding:9px;
+  border-radius:10px;
+  background:rgba(255,255,255,.035);
+  border:1px solid rgba(255,255,255,.06);
+}
+
+.trade-info-box span{
+  display:block;
+  color:#66827d;
+  font-size:10px;
+  text-transform:uppercase;
+  letter-spacing:1px;
+}
+
+.trade-info-box strong{
+  display:block;
+  margin-top:4px;
+  font-size:15px;
+  color:#fff;
+}
+
+#entry-countdown{
+  margin-top:12px;
+  padding:12px;
+  border-radius:12px;
+  background:rgba(0,255,204,.06);
+  border:1px solid rgba(0,255,204,.16);
+}
+
+#entry-text{
+  color:#9bb9b4;
+  font-size:11px;
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+}
+
+#entry-number{
+  font-size:42px;
+  line-height:1;
+  font-weight:900;
+  color:var(--accent);
+  margin-top:6px;
+  text-shadow:0 0 20px rgba(0,255,204,.5);
+}
+
+#trade-timer{
+  display:none;
+  margin-top:12px;
+}
+
+#trade-timer-label{
+  color:#78938f;
+  font-size:11px;
+  letter-spacing:1.5px;
+}
+
+#trade-time{
+  font-family:monospace;
+  font-size:42px;
+  font-weight:900;
+  color:#fff;
+  margin-top:4px;
+  text-shadow:0 0 15px rgba(255,255,255,.15);
+}
+
+#trade-status{
+  margin-top:10px;
+  color:#6e8985;
+  font-size:12px;
+}
+
+#trade-complete{
+  display:none;
+  margin-top:12px;
+  padding:12px;
+  border-radius:10px;
+  color:var(--accent);
+  border:1px solid rgba(0,255,204,.25);
+  background:rgba(0,255,204,.06);
+  font-weight:800;
+  letter-spacing:1px;
+}
+
+
+/* =========================================================
+   PHASE 2A — ANALYSIS DETAILS
+========================================================= */
+
+#analysis-details{
+  display:none;
+  margin-top:12px;
+  padding:12px;
+  border-radius:12px;
+  background:rgba(0,0,0,.28);
+  border:1px solid rgba(255,255,255,.06);
+}
+
+.analysis-title{
+  color:#78938f;
+  font-size:10px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  margin-bottom:8px;
+}
+
+.analysis-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:7px;
+}
+
+.analysis-item{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:7px 8px;
+  border-radius:8px;
+  background:rgba(255,255,255,.025);
+}
+
+.analysis-item span{
+  color:#76918c;
+  font-size:10px;
+}
+
+.analysis-item strong{
+  color:#eafffb;
+  font-size:11px;
+}
+
+.good{
+  color:#7cff4a!important;
+}
+
+.bad{
+  color:#ff617c!important;
+}
+
+.neutral{
+  color:#ffca63!important;
+}
+
+@media(max-width:520px){
+
+  .card{
+    padding:16px;
+  }
+
+  #clock{
+    left:10px;
+    bottom:10px;
+  }
+
+  #vip{
+    right:10px;
+    top:10px;
+  }
+
+  #big-count{
+    font-size:92px;
+    height:130px;
+  }
+
+}
+</style>
+</head>
+
+<body>
+
+<canvas id="candle-bg"></canvas>
+
+
+<div class="card" id="app">
+
+  <img
+    class="logo"
+    src="https://i.ibb.co/tpyQSb5f/file-000000001a8c620a8b4af7cfc7c2ab81.png"
+    alt="Flypy logo"
+    onerror="this.onerror=null;this.src='https://via.placeholder.com/96x96?text=Flypy'"
+  >
+
+  <h1>Flypy Monster — Private Bot</h1>
+
+
+  <!-- LOGIN -->
+
+  <div id="login-screen">
+
+    <input
+      id="license-key"
+      type="password"
+      placeholder="Enter license key"
+    >
+
+    <button id="unlock-btn">
+      Unlock Bot
+    </button>
+
+    <p class="note" id="license-note">
+      ⚠️ If you received this key from any third party and it becomes blocked,
+      Flypy is not responsible. Always get the official key from Admin: Flypy
+    </p>
+
+    <p class="note">
+      <strong>Buy key:</strong>
+      contact on Telegram — <code>@flypypirvateadmin</code>
+    </p>
+
+  </div>
+
+
+  <!-- CHANNEL -->
+
+  <div id="channel-screen" style="display:none">
+
+    <h2 style="margin:6px 0;font-size:16px">
+      📢 Official Flypy Channel
+    </h2>
+
+    <p class="small" style="text-align:left">
+      To receive signals, access OTC & LIVE markets, and high-accuracy tools,
+      join the official channel.
+    </p>
+
+    <div class="flex-row">
+
+      <a
+        id="channel-link"
+        class="btn-ghost"
+        href="https://whatsapp.com/channel/0029Vb686rKFXUubqIQ0yf1o"
+        target="_blank"
+        style="text-decoration:none"
+      >
+        🟢 Join Channel
+      </a>
+
+      <button id="verify-btn">
+        ✅ Verify
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <!-- BOT -->
+
+  <div id="bot-screen" style="display:none">
+
+    <div id="top-row" class="flex-row">
+
+      <input
+        type="number"
+        id="amountInput"
+        placeholder="Capital / Amount (USD)"
+        min="1"
+        value="100"
+      >
+
+      <select id="market-type">
+
+        <option value="otc">
+          OTC Market
+        </option>
+
+        <option value="live">
+          LIVE Market
+        </option>
+
+      </select>
+
+    </div>
+
+
+    <select id="server-select">
+
+      <option value="">
+        Select Server
+      </option>
+
+      <option value="granted">
+        GRANTED 🔐
+      </option>
+
+      <option value="powerx">
+        POWER-X
+      </option>
+
+      <option value="ultrafx">
+        ULTRA-FX
+      </option>
+
+    </select>
+
+
+    <select id="currency-select">
+
+      <option value="">
+        Select Pair
+      </option>
+
+    </select>
+
+
+    <select id="timeframe">
+
+      <option value="">
+        Select Timeframe
+      </option>
+
+    </select>
+
+
+    <div class="flex-row" style="margin-top:8px">
+
+      <button id="signal-btn">
+        📶 Generate Signal
+      </button>
+
+      <button id="auto-toggle" class="btn-ghost">
+        Auto (OFF)
+      </button>
+
+    </div>
+
+
+    <!-- Old cooldown removed -->
+
+    <div id="countdown"></div>
+
+
+    <div id="signal-box">
+      No signal yet — select your settings and press Generate Signal.
+    </div>
+
+
+    <div class="strength-bar">
+
+      <div
+        id="strength-fill"
+        class="strength-fill"
+      ></div>
+
+    </div>
+
+
+    <div class="confidence-meter">
+
+      <div id="confidence-fill"></div>
+
+    </div>
+
+
+    <!-- PHASE 2A ANALYSIS -->
+
+    <div id="analysis-details">
+
+      <div class="analysis-title">
+        MARKET CONFLUENCE
+      </div>
+
+      <div class="analysis-grid">
+
+        <div class="analysis-item">
+          <span>Trend</span>
+          <strong id="analysis-trend">--</strong>
+        </div>
+
+        <div class="analysis-item">
+          <span>Momentum</span>
+          <strong id="analysis-momentum">--</strong>
+        </div>
+
+        <div class="analysis-item">
+          <span>RSI</span>
+          <strong id="analysis-rsi">--</strong>
+        </div>
+
+        <div class="analysis-item">
+          <span>Price Action</span>
+          <strong id="analysis-action">--</strong>
+        </div>
+
+        <div class="analysis-item">
+          <span>Confluence</span>
+          <strong id="analysis-confluence">--</strong>
+        </div>
+
+        <div class="analysis-item">
+          <span>Risk</span>
+          <strong id="analysis-risk">--</strong>
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- TRADE PANEL -->
+
+    <div id="trade-panel">
+
+      <div class="trade-label">
+        FLYPY TRADE EXECUTION
+      </div>
+
+      <div class="trade-pair" id="trade-pair">
+        EUR/USD
+      </div>
+
+      <div
+        id="trade-direction"
+        class="trade-direction call"
+      >
+        CALL
+      </div>
+
+
+      <div class="trade-info">
+
+        <div class="trade-info-box">
+          <span>Confidence</span>
+          <strong id="trade-confidence">
+            --%
+          </strong>
+        </div>
+
+        <div class="trade-info-box">
+          <span>Strength</span>
+          <strong id="trade-strength">
+            --
+          </strong>
+        </div>
+
+        <div class="trade-info-box">
+          <span>Capital</span>
+          <strong id="trade-capital">
+            $--
+          </strong>
+        </div>
+
+        <div class="trade-info-box">
+          <span>Trade Amount</span>
+          <strong id="trade-amount">
+            $--
+          </strong>
+        </div>
+
+      </div>
+
+
+      <div id="entry-countdown">
+
+        <div id="entry-text">
+          PLACE TRADE IN
+        </div>
+
+        <div id="entry-number">
+          5
+        </div>
+
+      </div>
+
+
+      <div id="trade-timer">
+
+        <div id="trade-timer-label">
+          TRADE TIME REMAINING
+        </div>
+
+        <div id="trade-time">
+          01:00
+        </div>
+
+      </div>
+
+
+      <div id="trade-status">
+        Preparing trade...
+      </div>
+
+
+      <div id="trade-complete">
+        ✓ TRADE COMPLETE
+      </div>
+
+    </div>
+
+
+    <div id="history" aria-live="polite"></div>
+
+  </div>
+
+</div>
+
+
+<div id="vip">
+  FLYPY VIP 🔐
+</div>
+
+
+<div id="clock">
+  00:00:00
+</div>
+
+
+<!-- =========================================================
+     PHASE 2A FULLSCREEN SIGNAL OVERLAY
+========================================================= -->
+
+<div id="signal-overlay">
+
+  <div class="execution-card">
+
+    <div class="execution-top">
+      FLYPY MONSTER • SIGNAL ENGINE
+    </div>
+
+    <div
+      class="execution-pair"
+      id="overlay-pair"
+    >
+      EUR/USD
+    </div>
+
+    <div
+      class="execution-state"
+      id="overlay-state"
+    >
+      MARKET ANALYSIS COMPLETE
+    </div>
+
+    <div id="big-count">
+      5
+    </div>
+
+    <div
+      id="overlay-direction"
+      class="execution-direction call"
+    >
+      CALL
+    </div>
+
+
+    <div class="execution-meta">
+
+      <div class="execution-meta-box">
+        <span>Confidence</span>
+        <strong id="overlay-confidence">
+          --%
+        </strong>
+      </div>
+
+      <div class="execution-meta-box">
+        <span>Strength</span>
+        <strong id="overlay-strength">
+          --
+        </strong>
+      </div>
+
+      <div class="execution-meta-box">
+        <span>Timeframe</span>
+        <strong id="overlay-timeframe">
+          --
+        </strong>
+      </div>
+
+      <div class="execution-meta-box">
+        <span>Amount</span>
+        <strong id="overlay-amount">
+          $--
+        </strong>
+      </div>
+
+    </div>
+
+
+    <div class="execution-warning">
+      Signal execution countdown. Always verify market conditions
+      before placing a real trade.
+    </div>
+
+  </div>
+
+</div>
+
+
+<audio
+  id="trade-sound"
+  preload="auto"
+  src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg">
+</audio>
+
+<audio
+  id="success-sound"
+  preload="auto"
+  src="https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg">
+</audio>
+
+
+<script>
+
+/* =========================================================
+   FLYPY MONSTER — PHASE 2A
+========================================================= */
+
+
+const VALID_KEY = "Aafiyah_#Flypybro";
+
+
+let winCount = 0;
+let lossCount = 0;
+
+let lastSignal = null;
+
+let autoMode = false;
+
+let isWaiting = false;
+
+let lastAutoKey = null;
+
+let tradeInterval = null;
+
+let entryInterval = null;
+
+let overlayInterval = null;
+
+
+/* =========================================================
+   UI
+========================================================= */
+
+const loginScreen =
+  document.getElementById("login-screen");
+
+const channelScreen =
+  document.getElementById("channel-screen");
+
+const botScreen =
+  document.getElementById("bot-screen");
+
+const unlockBtn =
+  document.getElementById("unlock-btn");
+
+const verifyBtn =
+  document.getElementById("verify-btn");
+
+const signalBtn =
+  document.getElementById("signal-btn");
+
+const autoToggleBtn =
+  document.getElementById("auto-toggle");
+
+const licenseInput =
+  document.getElementById("license-key");
+
+const serverSelect =
+  document.getElementById("server-select");
+
+const currencySelect =
+  document.getElementById("currency-select");
+
+const timeframeSelect =
+  document.getElementById("timeframe");
+
+const capitalInput =
+  document.getElementById("amountInput");
+
+const marketTypeSelect =
+  document.getElementById("market-type");
+
+const signalBox =
+  document.getElementById("signal-box");
+
+const historyBox =
+  document.getElementById("history");
+
+const strengthFill =
+  document.getElementById("strength-fill");
+
+const confidenceFill =
+  document.getElementById("confidence-fill");
+
+const clockDiv =
+  document.getElementById("clock");
+
+const tradeSound =
+  document.getElementById("trade-sound");
+
+const successSound =
+  document.getElementById("success-sound");
+
+
+/* =========================================================
+   TRADE PANEL
+========================================================= */
+
+const tradePanel =
+  document.getElementById("trade-panel");
+
+const tradePair =
+  document.getElementById("trade-pair");
+
+const tradeDirection =
+  document.getElementById("trade-direction");
+
+const tradeConfidence =
+  document.getElementById("trade-confidence");
+
+const tradeStrength =
+  document.getElementById("trade-strength");
+
+const tradeCapital =
+  document.getElementById("trade-capital");
+
+const tradeAmount =
+  document.getElementById("trade-amount");
+
+const entryCountdown =
+  document.getElementById("entry-countdown");
+
+const entryNumber =
+  document.getElementById("entry-number");
+
+const tradeTimer =
+  document.getElementById("trade-timer");
+
+const tradeTime =
+  document.getElementById("trade-time");
+
+const tradeStatus =
+  document.getElementById("trade-status");
+
+const tradeComplete =
+  document.getElementById("trade-complete");
+
+
+/* =========================================================
+   ANALYSIS UI
+========================================================= */
+
+const analysisDetails =
+  document.getElementById("analysis-details");
+
+const analysisTrend =
+  document.getElementById("analysis-trend");
+
+const analysisMomentum =
+  document.getElementById("analysis-momentum");
+
+const analysisRsi =
+  document.getElementById("analysis-rsi");
+
+const analysisAction =
+  document.getElementById("analysis-action");
+
+const analysisConfluence =
+  document.getElementById("analysis-confluence");
+
+const analysisRisk =
+  document.getElementById("analysis-risk");
+
+
+/* =========================================================
+   OVERLAY UI
+========================================================= */
+
+const signalOverlay =
+  document.getElementById("signal-overlay");
+
+const bigCount =
+  document.getElementById("big-count");
+
+const overlayPair =
+  document.getElementById("overlay-pair");
+
+const overlayState =
+  document.getElementById("overlay-state");
+
+const overlayDirection =
+  document.getElementById("overlay-direction");
+
+const overlayConfidence =
+  document.getElementById("overlay-confidence");
+
+const overlayStrength =
+  document.getElementById("overlay-strength");
+
+const overlayTimeframe =
+  document.getElementById("overlay-timeframe");
+
+const overlayAmount =
+  document.getElementById("overlay-amount");
+
+
+/* =========================================================
+   SERVER CONFIG
+========================================================= */
+
+const serverPairs = {
+
+  granted:[
+    "EUR/USD"
+  ],
+
+  powerx:[
+    "USD/JPY",
+    "GBP/USD",
+    "AUD/USD"
+  ],
+
+  ultrafx:[
+    "USD/CAD",
+    "EUR/JPY"
+  ]
+
+};
+
+
+const serverTimes = {
+
+  granted:[
+    "1 Minute"
+  ],
+
+  powerx:[
+    "15 Seconds",
+    "30 Seconds",
+    "1 Minute"
+  ],
+
+  ultrafx:[
+    "30 Seconds",
+    "1 Minute",
+    "5 Minutes"
+  ]
+
+};
+
+
+/* =========================================================
+   LOGIN
+========================================================= */
+
+unlockBtn.addEventListener(
+  "click",
+  ()=>{
+
+    if(
+      licenseInput.value ===
+      VALID_KEY
+    ){
+
+      loginScreen.style.display="none";
+
+      channelScreen.style.display="block";
+
+    }else{
+
+      alert("❌ Invalid license key.");
+
+    }
+
+  }
+);
+
+
+/* =========================================================
+   CHANNEL
+========================================================= */
+
+verifyBtn.addEventListener(
+  "click",
+  ()=>{
+
+    alert(
+      "✅ Channel joined successfully! Full access granted."
+    );
+
+    channelScreen.style.display="none";
+
+    botScreen.style.display="block";
+
+    updateCurrencyList();
+
+    checkLiveAvailability();
+
+  }
+);
+
+
+/* =========================================================
+   SERVER
+========================================================= */
+
+serverSelect.addEventListener(
+  "change",
+  updateCurrencyList
+);
+
+
+function updateCurrencyList(){
+
+  const server =
+    serverSelect.value;
+
+  currencySelect.innerHTML="";
+
+  timeframeSelect.innerHTML="";
+
+
+  const pairs =
+    serverPairs[server] || [];
+
+  const times =
+    serverTimes[server] || [];
+
+
+  if(!pairs.length){
+
+    currencySelect.add(
+      new Option(
+        "Select Pair",
+        ""
+      )
+    );
+
+  }else{
+
+    pairs.forEach(pair=>{
+
+      currencySelect.add(
+        new Option(pair,pair)
+      );
+
+    });
+
+  }
+
+
+  if(!times.length){
+
+    timeframeSelect.add(
+      new Option(
+        "Select Timeframe",
+        ""
+      )
+    );
+
+  }else{
+
+    times.forEach(time=>{
+
+      timeframeSelect.add(
+        new Option(time,time)
+      );
+
+    });
+
+  }
+
+}
+
+
+/* =========================================================
+   TIME
+========================================================= */
+
+function getPakistanTime(){
+
+  return new Date().toLocaleTimeString(
+    "en-PK",
+    {
+      timeZone:"Asia/Karachi",
+      hour12:false,
+      hour:"2-digit",
+      minute:"2-digit",
+      second:"2-digit"
+    }
+  );
+
+}
+
+
+function formatClock(seconds){
+
+  const min =
+    Math.floor(seconds/60);
+
+  const sec =
+    seconds%60;
+
+  return (
+    String(min).padStart(2,"0")
+    + ":" +
+    String(sec).padStart(2,"0")
+  );
+
+}
+
+
+/* =========================================================
+   SEEDED RANDOM
+========================================================= */
+
+function pairSeed(pair){
+
+  let h=2166136261;
+
+  for(let i=0;i<pair.length;i++){
+
+    h ^= pair.charCodeAt(i);
+
+    h +=
+      (h<<1)+
+      (h<<4)+
+      (h<<7)+
+      (h<<8)+
+      (h<<24);
+
+  }
+
+  return Math.abs(h);
+
+}
+
+
+function mulberry32(a){
+
+  return function(){
+
+    a|=0;
+
+    a =
+      a +
+      0x6D2B79F5 |
+      0;
+
+    let t =
+      Math.imul(
+        a ^ a>>>15,
+        1|a
+      );
+
+    t =
+      t +
+      Math.imul(
+        t ^ t>>>7,
+        61|t
+      ) ^
+      t;
+
+    return (
+      (t ^ t>>>14)>>>0
+    ) / 4294967296;
+
+  };
+
+}
+
+
+/* =========================================================
+   SYNTHETIC CANDLES
+========================================================= */
+
+function generateSyntheticCandles(
+  pair,
+  periods,
+  timeframeSeconds
+){
+
+  const seedBase =
+    pairSeed(pair);
+
+  const now =
+    Math.floor(Date.now()/1000);
+
+  const endSlot =
+    Math.floor(
+      now/timeframeSeconds
+    ) *
+    timeframeSeconds;
+
+  const candles=[];
+
+  let previousClose=null;
+
+
+  for(
+    let i=periods-1;
+    i>=0;
+    i--
+  ){
+
+    const slot =
+      endSlot -
+      i*timeframeSeconds;
+
+    const localSeed =
+      (
+        seedBase ^
+        slot
+      )>>>0;
+
+    const rnd =
+      mulberry32(localSeed);
+
+
+    const base =
+      1.0 +
+      (
+        pair.charCodeAt(0)%10
+      )/100 +
+      (
+        pair.charCodeAt(
+          pair.length-1
+        )%10
+      )/200;
+
+
+    const wave =
+      Math.sin(
+        slot/300 +
+        seedBase%10
+      ) *
+      (
+        .0005 +
+        (
+          seedBase%100
+        )/100000
+      );
+
+
+    const noise =
+      (rnd()-.5) *
+      (
+        .001 +
+        (
+          seedBase%50
+        )/50000
+      );
+
+
+    const mid =
+      base*
+      (
+        1+
+        wave+
+        noise
+      );
+
+
+    let o =
+      previousClose ||
+      mid*
+      (
+        1+
+        (rnd()-.5)*
+        .0008
+      );
+
+
+    let c =
+      mid*
+      (
+        1+
+        (rnd()-.5)*
+        .0008
+      );
+
+
+    const high =
+      Math.max(o,c)*
+      (
+        1+
+        rnd()*.0006
+      );
+
+
+    const low =
+      Math.min(o,c)*
+      (
+        1-
+        rnd()*.0006
+      );
+
+
+    candles.push({
+
+      time:slot,
+
+      open:o,
+
+      high:high,
+
+      low:low,
+
+      close:c
+
+    });
+
+
+    previousClose=c;
+
+  }
+
+
+  return candles;
+
+}
+
+
+/* =========================================================
+   INDICATORS
+========================================================= */
+
+function sma(values,period){
+
+  if(values.length<period)
+    return null;
+
+  const slice =
+    values.slice(-period);
+
+  return slice.reduce(
+    (a,b)=>a+b,
+    0
+  )/period;
+
+}
+
+
+function momentum(values,period){
+
+  if(
+    values.length<=period
+  )
+    return 0;
+
+  return (
+    values[values.length-1] -
+    values[
+      values.length-1-period
+    ]
+  );
+
+}
+
+
+function ema(values,period){
+
+  const k =
+    2/(period+1);
+
+  let value =
+    values[0];
+
+  for(
+    let i=1;
+    i<values.length;
+    i++
+  ){
+
+    value =
+      values[i]*k +
+      value*(1-k);
+
+  }
+
+  return value;
+
+}
+
+
+function rsiLike(values,period){
+
+  if(
+    values.length<=period
+  )
+    return 50;
+
+  let gains=0;
+
+  let losses=0;
+
+
+  for(
+    let i=values.length-period;
+    i<values.length;
+    i++
+  ){
+
+    const delta =
+      values[i] -
+      values[i-1];
+
+    if(delta>0)
+      gains+=delta;
+    else
+      losses+=Math.abs(delta);
+
+  }
+
+
+  const rs =
+    gains/(losses||1e-8);
+
+
+  return 100-
+    (
+      100/
+      (1+rs)
+    );
+
+}
+
+
+/* =========================================================
+   PHASE 2A ANALYSIS
+========================================================= */
+
+function analyzeFromCandles(
+  candles,
+  server="live"
+){
+
+  const closes =
+    candles.map(
+      c=>c.close
+    );
+
+  const last =
+    candles[
+      candles.length-1
+    ];
+
+
+  const sma5 =
+    sma(closes,5);
+
+  const sma10 =
+    sma(closes,10);
+
+  const sma20 =
+    sma(closes,20);
+
+
+  const ema9 =
+    ema(closes,9);
+
+  const ema21 =
+    ema(closes,21);
+
+
+  const mom =
+    momentum(closes,3);
+
+  const mom5 =
+    momentum(closes,5);
+
+
+  const rsi =
+    rsiLike(closes,14);
+
+
+  const body =
+    Math.abs(
+      last.close-last.open
+    );
+
+
+  const upperWick =
+    last.high -
+    Math.max(
+      last.close,
+      last.open
+    );
+
+
+  const lowerWick =
+    Math.min(
+      last.close,
+      last.open
+    ) -
+    last.low;
+
+
+  let score=0;
+
+
+  let trend="NEUTRAL";
+
+  let momentumState="NEUTRAL";
+
+  let actionState="NEUTRAL";
+
+
+  /* TREND */
+
+  if(
+    sma5 &&
+    sma10 &&
+    sma20
+  ){
+
+    if(
+      sma5>sma10 &&
+      sma10>sma20
+    ){
+
+      score+=14;
+
+      trend="BULLISH";
+
+    }
+
+
+    if(
+      sma5<sma10 &&
+      sma10<sma20
+    ){
+
+      score-=14;
+
+      trend="BEARISH";
+
+    }
+
+  }
+
+
+  /* EMA CONFIRMATION */
+
+  if(
+    ema9>ema21
+  ){
+
+    score+=7;
+
+  }
+  else if(
+    ema9<ema21
+  ){
+
+    score-=7;
+
+  }
+
+
+  /* MOMENTUM */
+
+  if(
+    mom>0 &&
+    mom5>0
+  ){
+
+    score+=8;
+
+    momentumState="BULLISH";
+
+  }
+
+
+  if(
+    mom<0 &&
+    mom5<0
+  ){
+
+    score-=8;
+
+    momentumState="BEARISH";
+
+  }
+
+
+  /* RSI */
+
+  if(rsi>65){
+
+    score+=7;
+
+  }
+  else if(rsi<35){
+
+    score-=7;
+
+  }
+
+
+  /* PRICE ACTION */
+
+  if(
+    lowerWick>body*1.5 &&
+    rsi<45
+  ){
+
+    score+=9;
+
+    actionState="BUY REJECTION";
+
+  }
+
+
+  if(
+    upperWick>body*1.5 &&
+    rsi>55
+  ){
+
+    score-=9;
+
+    actionState="SELL REJECTION";
+
+  }
+
+
+  /* CANDLE SEQUENCE */
+
+  let up=0;
+
+  let down=0;
+
+
+  for(
+    let i=closes.length-4;
+    i<closes.length;
+    i++
+  ){
+
+    if(
+      closes[i]>
+      closes[i-1]
+    )
+      up++;
+    else
+      down++;
+
+  }
+
+
+  if(up>=2)
+    score+=5;
+
+
+  if(down>=2)
+    score-=5;
+
+
+  /* SIDEWAYS FILTER */
+
+  if(
+    rsi>45 &&
+    rsi<55 &&
+    Math.abs(mom)<.0001
+  ){
+
+    return {
+
+      allow:false,
+
+      actionable:false,
+
+      reason:"Sideways market",
+
+      confidence:50,
+
+      strength:"WEAK",
+
+      trend,
+
+      momentumState,
+
+      actionState,
+
+      rsi
+
+    };
+
+  }
+
+
+  const dir =
+    score>=0
+      ? "BUY"
+      : "SELL";
+
+
+  const raw =
+    Math.abs(score);
+
+
+  /*
+     Confidence is an internal signal score,
+     not a guarantee of actual win probability.
+  */
+
+  let confidence =
+    50 +
+    raw*1.75;
+
+
+  confidence =
+    Math.max(
+      40,
+      Math.min(
+        96,
+        confidence
+      )
+    );
+
+
+  let strength="WEAK";
+
+
+  if(raw>=30)
+    strength="STRONG";
+
+  else if(raw>=18)
+    strength="MODERATE";
+
+
+  /* SERVER FILTER */
+
+  if(
+    server==="granted"
+  ){
+
+    if(
+      confidence<75
+    ){
+
+      return {
+
+        allow:false,
+
+        actionable:false,
+
+        reason:"Granted low confidence",
+
+        confidence:
+          Math.round(
+            confidence
+          ),
+
+        strength,
+
+        trend,
+
+        momentumState,
+
+        actionState,
+
+        rsi
+
+      };
+
+    }
+
+
+    if(
+      strength!=="STRONG"
+    ){
+
+      return {
+
+        allow:false,
+
+        actionable:false,
+
+        reason:"Granted requires strong alignment",
+
+        confidence:
+          Math.round(
+            confidence
+          ),
+
+        strength,
+
+        trend,
+
+        momentumState,
+
+        actionState,
+
+        rsi
+
+      };
+
+    }
+
+  }
+
+
+  /* PROFESSIONAL TRADE SIZING */
+
+  let suggestedPct=5;
+
+
+  if(
+    strength==="MODERATE"
+  )
+    suggestedPct=8;
+
+
+  if(
+    strength==="STRONG"
+  )
+    suggestedPct=12;
+
+
+  /*
+     Additional confidence guard.
+  */
+
+  if(confidence>=88)
+    suggestedPct+=3;
+
+
+  suggestedPct =
+    Math.min(
+      15,
+      suggestedPct
+    );
+
+
+  let risk="NORMAL";
+
+
+  if(
+    confidence<65
+  )
+    risk="HIGH";
+
+
+  if(
+    confidence>=80
+  )
+    risk="CONTROLLED";
+
+
+  if(
+    confidence>=90
+  )
+    risk="LOW";
+
+
+  return {
+
+    allow:true,
+
+    actionable:true,
+
+    dir,
+
+    strength,
+
+    confidence:
+      Math.round(
+        confidence
+      ),
+
+    rsi,
+
+    mom,
+
+    price:
+      last.close,
+
+    trend,
+
+    momentumState,
+
+    actionState,
+
+    confluence:
+      Math.min(
+        100,
+        50+
+        raw*1.5
+      ),
+
+    suggestedPct,
+
+    risk
+
+  };
+
+}
+
+
+/* =========================================================
+   STRENGTH BAR
+========================================================= */
+
+function setStrengthBar(
+  strength,
+  confidence
+){
+
+  let pct=10;
+
+  let color="#666";
+
+
+  if(
+    strength==="WEAK"
+  ){
+
+    pct=Math.max(
+      18,
+      confidence*.3
+    );
+
+    color="#ff375f";
+
+  }
+
+  else if(
+    strength==="MODERATE"
+  ){
+
+    pct=Math.max(
+      50,
+      confidence*.6
+    );
+
+    color="#ffb84d";
+
+  }
+
+  else{
+
+    pct=Math.min(
+      100,
+      Math.max(
+        80,
+        confidence
+      )
+    );
+
+    color="#7cff4a";
+
+  }
+
+
+  strengthFill.style.width =
+    pct+"%";
+
+  strengthFill.style.background =
+    color;
+
+
+  confidenceFill.style.width =
+    confidence+"%";
+
+}
+
+
+/* =========================================================
+   ANALYSIS DISPLAY
+========================================================= */
+
+function updateAnalysis(result){
+
+  analysisDetails.style.display =
+    "block";
+
+
+  analysisTrend.textContent =
+    result.trend || "--";
+
+
+  analysisMomentum.textContent =
+    result.momentumState || "--";
+
+
+  analysisRsi.textContent =
+    result.rsi
+      ? result.rsi.toFixed(1)
+      : "--";
+
+
+  analysisAction.textContent =
+    result.actionState || "--";
+
+
+  analysisConfluence.textContent =
+    result.confluence
+      ? Math.round(
+          result.confluence
+        )+"%"
+      : "--";
+
+
+  analysisRisk.textContent =
+    result.risk || "--";
+
+
+  analysisTrend.className =
+    result.trend==="BULLISH"
+      ? "good"
+      : result.trend==="BEARISH"
+        ? "bad"
+        : "neutral";
+
+
+  analysisMomentum.className =
+    result.momentumState==="BULLISH"
+      ? "good"
+      : result.momentumState==="BEARISH"
+        ? "bad"
+        : "neutral";
+
+
+  analysisRisk.className =
+    result.risk==="LOW"
+      ? "good"
+      : result.risk==="HIGH"
+        ? "bad"
+        : "neutral";
+
+}
+
+
+/* =========================================================
+   HISTORY
+========================================================= */
+
+function logHistory(text){
+
+  const div =
+    document.createElement(
+      "div"
+    );
+
+  div.className =
+    "history-entry";
+
+
+  div.textContent =
+    `🕗 ${getPakistanTime()} — ${text}`;
+
+
+  historyBox.prepend(div);
+
+
+  while(
+    historyBox.childElementCount>200
+  ){
+
+    historyBox.removeChild(
+      historyBox.lastChild
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   SOUND
+========================================================= */
+
+function playTradeSound(){
+
+  try{
+
+    tradeSound.currentTime=0;
+
+    tradeSound.play();
+
+  }catch(e){}
+
+}
+
+
+function playSuccess(){
+
+  try{
+
+    successSound.currentTime=0;
+
+    successSound.play();
+
+  }catch(e){}
+
+}
+
+
+/* =========================================================
+   TIMEFRAME
+========================================================= */
+
+function getTimeframeSeconds(text){
+
+  if(!text)
+    return 60;
+
+
+  if(
+    text.includes("5 Minutes")
+  )
+    return 300;
+
+
+  if(
+    text.includes("1 Minute")
+  )
+    return 60;
+
+
+  if(
+    text.includes("30 Seconds")
+  )
+    return 30;
+
+
+  if(
+    text.includes("15 Seconds")
+  )
+    return 15;
+
+
+  return 60;
+
+}
+
+
+/* =========================================================
+   RESET TRADE
+========================================================= */
+
+function resetTradePanel(){
+
+  clearInterval(
+    entryInterval
+  );
+
+  clearInterval(
+    tradeInterval
+  );
+
+
+  tradePanel.style.display =
+    "none";
+
+
+  entryCountdown.style.display =
+    "block";
+
+
+  tradeTimer.style.display =
+    "none";
+
+
+  tradeComplete.style.display =
+    "none";
+
+
+  tradeStatus.textContent =
+    "Preparing trade...";
+
+}
+
+
+/* =========================================================
+   FULLSCREEN SIGNAL COUNTDOWN
+========================================================= */
+
+function showSignalOverlay(
+  result,
+  pair,
+  timeframeText,
+  amount,
+  callback
+){
+
+  clearInterval(
+    overlayInterval
+  );
+
+
+  overlayPair.textContent =
+    pair;
+
+
+  const isCall =
+    result.dir==="BUY";
+
+
+  overlayDirection.textContent =
+    isCall
+      ? "CALL"
+      : "PUT";
+
+
+  overlayDirection.className =
+    "execution-direction " +
+    (
+      isCall
+        ? "call"
+        : "put"
+    );
+
+
+  overlayConfidence.textContent =
+    result.confidence+"%";
+
+
+  overlayStrength.textContent =
+    result.strength;
+
+
+  overlayTimeframe.textContent =
+    timeframeText;
+
+
+  overlayAmount.textContent =
+    "$"+amount.toFixed(2);
+
+
+  overlayState.textContent =
+    "PREPARE TO PLACE TRADE";
+
+
+  bigCount.classList.remove(
+    "go"
+  );
+
+
+  let count=5;
+
+  bigCount.textContent =
+    count;
+
+
+  signalOverlay.classList.add(
+    "active"
+  );
+
+
+  playTradeSound();
+
+
+  overlayInterval =
+    setInterval(()=>{
+
+      count--;
+
+
+      if(count<=0){
+
+        clearInterval(
+          overlayInterval
+        );
+
+
+        bigCount.textContent =
+          "GO";
+
+        bigCount.classList.add(
+          "go"
+        );
+
+
+        overlayState.textContent =
+          "PLACE TRADE NOW";
+
+
+        try{
+
+          tradeSound.currentTime=0;
+
+          tradeSound.play();
+
+        }catch(e){}
+
+
+        setTimeout(()=>{
+
+          signalOverlay.classList.remove(
+            "active"
+          );
+
+
+          bigCount.classList.remove(
+            "go"
+          );
+
+
+          if(callback)
+            callback();
+
+        },900);
+
+
+        return;
+
+      }
+
+
+      bigCount.textContent =
+        count;
+
+
+      bigCount.classList.remove(
+        "go"
+      );
+
+
+    },1000);
+
+}
+
+
+/* =========================================================
+   SHOW TRADE PANEL
+========================================================= */
+
+function showTradePanel(
+  result,
+  pair,
+  capital,
+  timeframeText,
+  market
+){
+
+  clearInterval(
+    entryInterval
+  );
+
+  clearInterval(
+    tradeInterval
+  );
+
+
+  tradePanel.style.display =
+    "block";
+
+
+  tradePanel.classList.remove(
+    "active"
+  );
+
+
+  void tradePanel.offsetWidth;
+
+
+  tradePanel.classList.add(
+    "active"
+  );
+
+
+  tradePair.textContent =
+    `${pair} • ${market.toUpperCase()}`;
+
+
+  const isCall =
+    result.dir==="BUY";
+
+
+  tradeDirection.textContent =
+    isCall
+      ? "CALL"
+      : "PUT";
+
+
+  tradeDirection.className =
+    "trade-direction " +
+    (
+      isCall
+        ? "call"
+        : "put"
+    );
+
+
+  tradeConfidence.textContent =
+    result.confidence+"%";
+
+
+  tradeStrength.textContent =
+    result.strength;
+
+
+  tradeCapital.textContent =
+    "$"+capital.toFixed(2);
+
+
+  const pct =
+    result.suggestedPct;
+
+
+  const amount =
+    capital*pct/100;
+
+
+  tradeAmount.textContent =
+    "$"+amount.toFixed(2);
+
+
+  tradeComplete.style.display =
+    "none";
+
+
+  entryCountdown.style.display =
+    "block";
+
+
+  tradeTimer.style.display =
+    "none";
+
+
+  let count=5;
+
+
+  entryNumber.textContent =
+    count;
+
+
+  tradeStatus.textContent =
+    `Prepare ${
+      isCall
+        ? "CALL"
+        : "PUT"
+    } trade • ${timeframeText}`;
+
+
+  /*
+     The fullscreen Phase 2A overlay already
+     performs the main 5-second execution countdown.
+     This smaller countdown is kept synchronized
+     as a secondary status.
+  */
+
+  entryInterval =
+    setInterval(()=>{
+
+      count--;
+
+
+      if(count<=0){
+
+        clearInterval(
+          entryInterval
+        );
+
+
+        entryNumber.textContent =
+          "GO";
+
+
+        tradeStatus.textContent =
+          "Trade active — timeframe started.";
+
+
+        startTradeTimer(
+          getTimeframeSeconds(
+            timeframeText
+          )
+        );
+
+
+        return;
+
+      }
+
+
+      entryNumber.textContent =
+        count;
+
+    },1000);
+
+}
+
+
+/* =========================================================
+   TRADE TIMER
+========================================================= */
+
+function startTradeTimer(seconds){
+
+  entryCountdown.style.display =
+    "none";
+
+
+  tradeTimer.style.display =
+    "block";
+
+
+  let left=seconds;
+
+
+  tradeTime.textContent =
+    formatClock(left);
+
+
+  tradeStatus.textContent =
+    "Trade is running...";
+
+
+  tradeInterval =
+    setInterval(()=>{
+
+      left--;
+
+
+      if(left<=0){
+
+        clearInterval(
+          tradeInterval
+        );
+
+
+        tradeTime.textContent =
+          "00:00";
+
+
+        tradeStatus.textContent =
+          "Timeframe completed.";
+
+
+        tradeComplete.style.display =
+          "block";
+
+
+        playSuccess();
+
+
+        logHistory(
+          "✓ TRADE COMPLETE"
+        );
+
+
+        return;
+
+      }
+
+
+      tradeTime.textContent =
+        formatClock(left);
+
+    },1000);
+
+}
+
+
+/* =========================================================
+   GET SIGNAL — REAL BACKEND ENGINE
+========================================================= */
+
+async function getSignal(auto=false){
+  const server=serverSelect.value;
+  const pair=currencySelect.value;
+  const timeframe=timeframeSelect.value;
+  const market=marketTypeSelect.value;
+  const capital=parseFloat(capitalInput.value||0);
+
+  if(!server || !pair || !timeframe || !(capital>0)){
+    signalBox.textContent="⚠️ Please select server, pair, timeframe and enter capital.";
+    return;
+  }
+
+  if(market==="live" && !isLiveAvailable()){
+    signalBox.textContent="⚠️ LIVE market is currently unavailable. Please use OTC or try again during live hours.";
+    return;
+  }
+
+  resetTradePanel();
+  analysisDetails.style.display="none";
+  signalBox.textContent="🧠 FLYPY AI ENGINE\n\nFetching real market data...";
+  setStrengthBar("WEAK",0);
+
+  try{
+    const params=new URLSearchParams({server,pair,timeframe,market});
+    const response=await fetch(`/api/signal?${params.toString()}`,{
+      method:"GET",
+      cache:"no-store",
+      headers:{"Accept":"application/json"}
+    });
+
+    const text=await response.text();
+    let data={};
+    try{ data=JSON.parse(text); }
+    catch{
+      throw new Error(`Backend returned non-JSON response (HTTP ${response.status}).`);
+    }
+
+    if(!response.ok || data.ok===false){
+      throw new Error(data.error || `Signal backend HTTP ${response.status}`);
+    }
+
+    const analysis=data.analysis || {};
+    const signal=String(data.signal||"NO SIGNAL").toUpperCase();
+    const confidence=Number(data.confidence ?? analysis.score ?? 0);
+    const agreement=Number(data.agreement ?? analysis.agreement ?? 0);
+    const confluence=agreement<=1 ? agreement*100 : agreement;
+    const strength=data.strength || (confidence>=92?"ELITE":confidence>=86?"STRONG":"MODERATE");
+    const risk=data.risk || "CONTROLLED";
+    const trend=(analysis.structure?.trend || "NEUTRAL");
+    const rsi=Number(analysis.rsi ?? 0);
+    const momentumState=Number(analysis.macd ?? 0)>0 ? "BULLISH" : Number(analysis.macd ?? 0)<0 ? "BEARISH" : "NEUTRAL";
+    const actionState=analysis.candle?.direction || "NEUTRAL";
+
+    const result={
+      ...analysis,
+      ...data,
+      dir:signal==="CALL" ? "BUY" : signal==="PUT" ? "SELL" : "NONE",
+      signal,
+      confidence,
+      strength,
+      risk,
+      trend,
+      momentumState,
+      rsi,
+      actionState,
+      confluence,
+      suggestedPct:3
+    };
+
+    updateAnalysis(result);
+    setStrengthBar(strength,confidence);
+
+    if(signal!=="CALL" && signal!=="PUT"){
+      const reason=data.reason || analysis.reason || "Market evidence is conflicting.";
+      signalBox.textContent=
+        `⚠️ ${server.toUpperCase()} CHECK\n`+
+        `NO SIGNAL\n\n`+
+        `Reason: ${reason}\n`+
+        `Confidence: ${confidence}%\n\n`+
+        `⏳ RECOMMENDATION: WAIT`;
+      logHistory(`${server.toUpperCase()} NO SIGNAL — ${reason}`);
+      return;
+    }
+
+    const tradeAmount=capital*(result.suggestedPct/100);
+
+    signalBox.textContent=
+      `📡 ${server.toUpperCase()} SIGNAL\n`+
+      `${signal}\n`+
+      `PAIR: ${pair}\n`+
+      `TIMEFRAME: ${timeframe}\n`+
+      `Confidence: ${confidence}%\n`+
+      `Strength: ${strength}\n`+
+      `Confluence: ${Math.round(confluence)}%\n`+
+      `Risk: ${risk}\n`+
+      `🕗 ${getPakistanTime()}`;
+
+    lastSignal={
+      ...result,
+      pair,
+      timeframe,
+      market,
+      time:Date.now()
+    };
+
+    logHistory(`${server.toUpperCase()} ${signal} ${strength} — ${confidence}%`);
+
+    showSignalOverlay(
+      result,
+      pair,
+      timeframe,
+      tradeAmount,
+      ()=>showTradePanel(result,pair,capital,timeframe,market)
+    );
+
+  }catch(error){
+    console.error("FLYPY signal error:",error);
+    signalBox.textContent=
+      `❌ SIGNAL ERROR\n\n${error.message}\n\n`+
+      `Recommendation: WAIT / SKIP`;
+    setStrengthBar("WEAK",0);
+    logHistory(`${server.toUpperCase()} FEED ERROR — ${error.message}`);
+  }
+}
+
+/* =========================================================
+   SIGNAL BUTTON
+   OLD COOLDOWN REMOVED
+========================================================= */
+
+signalBtn.addEventListener(
+  "click",
+  handleSignalClick
+);
+
+
+function handleSignalClick(){
+
+  if(isWaiting)
+    return;
+
+
+  const server =
+    serverSelect.value;
+
+
+  const pair =
+    currencySelect.value;
+
+
+  const timeframe =
+    timeframeSelect.value;
+
+
+  const capital =
+    parseFloat(
+      capitalInput.value||0
+    );
+
+
+  if(
+    !server ||
+    !pair ||
+    !timeframe ||
+    !(capital>0)
+  ){
+
+    signalBox.textContent =
+      "⚠️ Please complete all settings first.";
+
+    return;
+
+  }
+
+
+  /*
+     No old visible cooldown bar.
+     Button lock prevents accidental
+     double generation during execution.
+  */
+
+  isWaiting=true;
+
+  signalBtn.disabled=true;
+
+  signalBtn.textContent =
+    "⏳ Processing Signal...";
+
+
+  getSignal(false);
+
+
+  /*
+     Short internal protection timer.
+     Nothing is displayed to the user.
+  */
+
+  setTimeout(()=>{
+
+    isWaiting=false;
+
+    signalBtn.disabled=false;
+
+    signalBtn.textContent =
+      "📶 Generate Signal";
+
+  },6500);
+
+}
+
+
+/* =========================================================
+   AUTO
+========================================================= */
+
+autoToggleBtn.addEventListener(
+  "click",
+  ()=>{
+
+    autoMode=!autoMode;
+
+
+    autoToggleBtn.textContent =
+      autoMode
+        ? "Auto (ON)"
+        : "Auto (OFF)";
+
+
+    autoToggleBtn.classList.toggle(
+      "active",
+      autoMode
+    );
+
+  }
+);
+
+
+/* =========================================================
+   LIVE AVAILABILITY
+========================================================= */
+
+function isLiveAvailable(){
+
+  const now =
+    new Date();
+
+
+  const day =
+    now.getUTCDay();
+
+
+  const hour =
+    now.getUTCHours();
+
+
+  if(day===0)
+    return false;
+
+
+  return (
+    hour>=6 &&
+    hour<20
+  );
+
+}
+
+
+function checkLiveAvailability(){
+
+  const liveOption =
+    Array.from(
+      marketTypeSelect.options
+    ).find(
+      option =>
+        option.value==="live"
+    );
+
+
+  if(!liveOption)
+    return;
+
+
+  if(
+    isLiveAvailable()
+  ){
+
+    liveOption.disabled=false;
+
+    liveOption.textContent =
+      "LIVE Market (Available)";
+
+  }
+  else{
+
+    liveOption.disabled=true;
+
+    liveOption.textContent =
+      "LIVE Market (Unavailable)";
+
+
+    if(
+      marketTypeSelect.value==="live"
+    ){
+
+      marketTypeSelect.value =
+        "otc";
+
+    }
+
+  }
+
+}
+
+
+/* =========================================================
+   CLOCK + AUTO
+========================================================= */
+
+setInterval(()=>{
+
+  clockDiv.textContent =
+    getPakistanTime();
+
+
+  checkLiveAvailability();
+
+
+  if(
+    autoMode &&
+    botScreen.style.display!=="none" &&
+    !isWaiting
+  ){
+
+    const server =
+      serverSelect.value;
+
+
+    const market =
+      marketTypeSelect.value;
+
+
+    const now =
+      new Date();
+
+
+    const minute =
+      now.getMinutes();
+
+
+    const key =
+      `${now.getFullYear()}-`+
+      `${now.getMonth()}-`+
+      `${now.getDate()}-`+
+      `${now.getHours()}-`+
+      `${minute}`;
+
+
+    if(
+      server==="granted" &&
+      market==="otc" &&
+      (
+        minute===0 ||
+        minute===30
+      ) &&
+      lastAutoKey!==key
+    ){
+
+      lastAutoKey=key;
+
+      getSignal(true);
+
+    }
+
+  }
+
+},1000);
+
+
+/* =========================================================
+   MOVING CANDLE BACKGROUND
+========================================================= */
+
+window.addEventListener(
+  "load",
+  ()=>{
+
+    const canvas =
+      document.getElementById(
+        "candle-bg"
+      );
+
+
+    const ctx =
+      canvas.getContext("2d");
+
+
+    function resize(){
+
+      canvas.width =
+        window.innerWidth;
+
+      canvas.height =
+        window.innerHeight;
+
+    }
+
+
+    resize();
+
+
+    window.addEventListener(
+      "resize",
+      resize
+    );
+
+
+    const candles=[];
+
+
+    for(
+      let i=0;
+      i<60;
+      i++
+    ){
+
+      candles.push({
+
+        x:
+          Math.random()*
+          canvas.width,
+
+        y:
+          Math.random()*
+          canvas.height,
+
+        h:
+          30+
+          Math.random()*70,
+
+        v:
+          .3+
+          Math.random()*.7,
+
+        dir:
+          Math.random()>.5
+
+      });
+
+    }
+
+
+    function draw(){
+
+      ctx.clearRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+      );
+
+
+      candles.forEach(c=>{
+
+        c.y-=c.v;
+
+
+        if(
+          c.y<-100
+        ){
+
+          c.y =
+            canvas.height+100;
+
+
+          c.x =
+            Math.random()*
+            canvas.width;
+
+        }
+
+
+        ctx.strokeStyle =
+          c.dir
+            ? "#00ffcc"
+            : "#ff375f";
+
+
+        ctx.lineWidth=2;
+
+
+        ctx.beginPath();
+
+
+        ctx.moveTo(
+          c.x,
+          c.y
+        );
+
+
+        ctx.lineTo(
+          c.x,
+          c.y+c.h
+        );
+
+
+        ctx.stroke();
+
+
+        ctx.lineWidth=6;
+
+
+        ctx.beginPath();
+
+
+        ctx.moveTo(
+          c.x,
+          c.y+c.h*.25
+        );
+
+
+        ctx.lineTo(
+          c.x,
+          c.y+c.h*.75
+        );
+
+
+        ctx.stroke();
+
+      });
+
+
+      requestAnimationFrame(
+        draw
+      );
+
+    }
+
+
+    draw();
+
+  }
+);
+
+</script>
+
+</body>
+</html>
