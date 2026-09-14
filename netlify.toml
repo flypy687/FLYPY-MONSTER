@@ -4,6 +4,6 @@
 
 [[redirects]]
   from = "/api/*"
-  to = "https://YOUR-RENDER-URL.onrender.com/api/:splat"
+  to = "https://crimsonmeadow-27286.app.onebit.ng/api/:splat"
   status = 200
   force = true
